@@ -29,6 +29,18 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
+      # identity-service spins up a Lettuce client at boot, so the test
+      # suite needs Redis reachable on localhost:6379. Without this the
+      # service blew up with "Unable to connect to localhost:6379"
+      # before any test method ran.
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
 
     steps:
       - uses: actions/checkout@v4
@@ -47,7 +59,12 @@ jobs:
         run: ./mvnw -B -ntp -T 1C package -DskipTests
 
       - name: Run unit tests
-        run: ./mvnw -B -ntp -T 1C test
+        # Exclude *IntegrationTest from this step — those are handled
+        # by the dedicated Testcontainers step below. Without this,
+        # mvn test picks up IdentityIntegrationTest, which needs the
+        # full Kafka stack (not just Postgres + Redis) and times out
+        # waiting for the bewerbi.users.registered topic metadata.
+        run: ./mvnw -B -ntp -T 1C test -Dtest='!*IntegrationTest'
 
       - name: Run integration tests (Testcontainers)
         env:
