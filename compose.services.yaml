@@ -1,0 +1,236 @@
+# Extension compose file that runs every bewerbi service in containers.
+# Usage (from repo root):
+#   docker compose -f compose.yaml -f compose.services.yaml up --build
+#
+# Kept separate from compose.yaml so developers can still `./mvnw spring-boot:run`
+# an individual service against the infra containers without building all images.
+
+# Reusable blocks (YAML anchors) — keep observability + healthcheck config DRY.
+x-otel-env: &otel-env
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
+  TRACING_SAMPLE: "1.0"
+  SPRING_PROFILES_ACTIVE: prod
+x-healthcheck: &healthcheck
+  # $$SERVER_PORT is escaped to prevent Compose from expanding it — it is
+  # evaluated by the container shell at check time.
+  test: ["CMD-SHELL", "wget -qO- http://localhost:$$SERVER_PORT/actuator/health | grep -q UP || exit 1"]
+  interval: 15s
+  timeout: 5s
+  retries: 6
+  start_period: 60s
+
+services:
+  identity-service:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.service
+      args:
+        MODULE_PATH: services/identity-service
+        MODULE_ARTIFACT: identity-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/bewerbi?currentSchema=identity
+      DB_USER: bewerbi
+      DB_PASSWORD: bewerbi_dev
+      REDIS_HOST: redis
+      MAIL_HOST: mailhog
+      JWT_SECRET: ${JWT_SECRET:-a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
+      I18N_SERVICE_URL: http://i18n-service:8181
+      KAFKA_BOOTSTRAP: kafka:29092
+      SERVER_PORT: "8081"
+      <<: *otel-env
+    healthcheck: *healthcheck
+    ports: ["8081:8081"]
+    depends_on: [postgres, redis, i18n-service, kafka]
+
+  i18n-service:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.service
+      args:
+        MODULE_PATH: services/i18n-service
+        MODULE_ARTIFACT: i18n-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/bewerbi?currentSchema=i18n
+      DB_USER: bewerbi
+      DB_PASSWORD: bewerbi_dev
+      SERVER_PORT: "8181"
+      <<: *otel-env
+    healthcheck: *healthcheck
+    ports: ["8181:8181"]
+    depends_on: [postgres]
+
+  jobs-service:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.service
+      args:
+        MODULE_PATH: services/jobs-service
+        MODULE_ARTIFACT: jobs-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/bewerbi?currentSchema=jobs
+      DB_USER: bewerbi
+      DB_PASSWORD: bewerbi_dev
+      REDIS_HOST: redis
+      JWT_SECRET: ${JWT_SECRET:-a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
+      I18N_SERVICE_URL: http://i18n-service:8181
+      SERVER_PORT: "8082"
+      <<: *otel-env
+    healthcheck: *healthcheck
+    ports: ["8082:8082"]
+    depends_on: [postgres, redis, i18n-service]
+
+  applications-service:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.service
+      args:
+        MODULE_PATH: services/applications-service
+        MODULE_ARTIFACT: applications-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/bewerbi?currentSchema=applications
+      DB_USER: bewerbi
+      DB_PASSWORD: bewerbi_dev
+      REDIS_HOST: redis
+      JWT_SECRET: ${JWT_SECRET:-a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
+      I18N_SERVICE_URL: http://i18n-service:8181
+      KAFKA_BOOTSTRAP: kafka:29092
+      SERVER_PORT: "8083"
+      <<: *otel-env
+    healthcheck: *healthcheck
+    ports: ["8083:8083"]
+    depends_on: [postgres, redis, i18n-service, kafka]
+
+  companies-service:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.service
+      args:
+        MODULE_PATH: services/companies-service
+        MODULE_ARTIFACT: companies-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/bewerbi?currentSchema=companies
+      DB_USER: bewerbi
+      DB_PASSWORD: bewerbi_dev
+      REDIS_HOST: redis
+      JWT_SECRET: ${JWT_SECRET:-a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
+      I18N_SERVICE_URL: http://i18n-service:8181
+      SERVER_PORT: "8084"
+      <<: *otel-env
+    healthcheck: *healthcheck
+    ports: ["8084:8084"]
+    depends_on: [postgres, redis, i18n-service]
+
+  immigration-service:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.service
+      args:
+        MODULE_PATH: services/immigration-service
+        MODULE_ARTIFACT: immigration-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/bewerbi?currentSchema=immigration
+      DB_USER: bewerbi
+      DB_PASSWORD: bewerbi_dev
+      REDIS_HOST: redis
+      JWT_SECRET: ${JWT_SECRET:-a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
+      I18N_SERVICE_URL: http://i18n-service:8181
+      SERVER_PORT: "8085"
+      <<: *otel-env
+    healthcheck: *healthcheck
+    ports: ["8085:8085"]
+    depends_on: [postgres, redis, i18n-service]
+
+  documents-service:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.service
+      args:
+        MODULE_PATH: services/documents-service
+        MODULE_ARTIFACT: documents-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/bewerbi?currentSchema=documents
+      DB_USER: bewerbi
+      DB_PASSWORD: bewerbi_dev
+      JWT_SECRET: ${JWT_SECRET:-a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
+      UPLOAD_ROOT: /data/uploads
+      SERVER_PORT: "8086"
+      <<: *otel-env
+    healthcheck: *healthcheck
+    volumes:
+      - documents_data:/data/uploads
+    ports: ["8086:8086"]
+    depends_on: [postgres]
+
+  matching-service:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.service
+      args:
+        MODULE_PATH: services/matching-service
+        MODULE_ARTIFACT: matching-service
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
+      JOBS_SERVICE_URL: http://jobs-service:8082
+      IDENTITY_SERVICE_URL: http://identity-service:8081
+      SERVER_PORT: "8087"
+      <<: *otel-env
+    healthcheck: *healthcheck
+    ports: ["8087:8087"]
+    depends_on: [jobs-service, identity-service]
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.service
+      args:
+        MODULE_PATH: services/notification-service
+        MODULE_ARTIFACT: notification-service
+    environment:
+      MAIL_HOST: mailhog
+      MAIL_PORT: "1025"
+      REDIS_HOST: redis
+      JWT_SECRET: ${JWT_SECRET:-a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
+      I18N_SERVICE_URL: http://i18n-service:8181
+      KAFKA_BOOTSTRAP: kafka:29092
+      SERVER_PORT: "8088"
+      <<: *otel-env
+    healthcheck: *healthcheck
+    ports: ["8088:8088"]
+    depends_on: [mailhog, redis, i18n-service, kafka]
+
+  gateway:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.service
+      args:
+        MODULE_PATH: gateway
+        MODULE_ARTIFACT: gateway
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
+      routes.identity-service: http://identity-service:8081
+      routes.i18n-service: http://i18n-service:8181
+      routes.jobs-service: http://jobs-service:8082
+      routes.applications-service: http://applications-service:8083
+      routes.companies-service: http://companies-service:8084
+      routes.immigration-service: http://immigration-service:8085
+      routes.documents-service: http://documents-service:8086
+      routes.matching-service: http://matching-service:8087
+      routes.notification-service: http://notification-service:8088
+      REDIS_HOST: redis
+      SERVER_PORT: "8080"
+      <<: *otel-env
+    healthcheck: *healthcheck
+    ports: ["8080:8080"]
+    depends_on:
+      identity-service: { condition: service_healthy }
+      i18n-service: { condition: service_healthy }
+      jobs-service: { condition: service_healthy }
+      applications-service: { condition: service_healthy }
+      companies-service: { condition: service_healthy }
+      immigration-service: { condition: service_healthy }
+      documents-service: { condition: service_healthy }
+      matching-service: { condition: service_healthy }
+      notification-service: { condition: service_healthy }
+
+volumes:
+  documents_data:

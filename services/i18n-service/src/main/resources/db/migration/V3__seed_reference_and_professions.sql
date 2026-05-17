@@ -1,0 +1,141 @@
+-- Reference data: visa types & anerkennung stages (localized)
+INSERT INTO reference_entries (type, code, sort_order, metadata) VALUES
+  ('visa_type','BLUE_CARD',1,'{"paragraph":"§18b"}'),
+  ('visa_type','SKILLED_WORKER_VOCATIONAL',2,'{"paragraph":"§18a"}'),
+  ('visa_type','SKILLED_WORKER_ACADEMIC',3,'{"paragraph":"§18b"}'),
+  ('visa_type','VOCATIONAL_TRAINING',4,'{"paragraph":"§16a"}'),
+  ('visa_type','STUDY',5,'{"paragraph":"§16b"}'),
+  ('visa_type','JOB_SEEKER',6,'{"paragraph":"§20"}'),
+  ('visa_type','RECOGNITION',7,'{"paragraph":"§16d"}'),
+  ('visa_type','CHANCENKARTE',8,'{"paragraph":"§20a"}');
+
+INSERT INTO reference_entry_translations (type, code, locale, label, hint) VALUES
+  ('visa_type','BLUE_CARD','de','Blaue Karte EU','Akademisch, Mindestgehalt beachten'),
+  ('visa_type','BLUE_CARD','fr','Carte bleue UE','Universitaire, seuil de salaire'),
+  ('visa_type','BLUE_CARD','ar','البطاقة الزرقاء الأوروبية','لأصحاب الشهادات الجامعية'),
+  ('visa_type','SKILLED_WORKER_VOCATIONAL','de','Fachkraft Berufsausbildung',NULL),
+  ('visa_type','SKILLED_WORKER_VOCATIONAL','fr','Travailleur qualifié formation',NULL),
+  ('visa_type','SKILLED_WORKER_VOCATIONAL','ar','عامل مؤهل مع تدريب',NULL),
+  ('visa_type','SKILLED_WORKER_ACADEMIC','de','Fachkraft akademisch',NULL),
+  ('visa_type','SKILLED_WORKER_ACADEMIC','fr','Travailleur qualifié académique',NULL),
+  ('visa_type','SKILLED_WORKER_ACADEMIC','ar','عامل مؤهل أكاديمي',NULL),
+  ('visa_type','VOCATIONAL_TRAINING','de','Ausbildungsvisum',NULL),
+  ('visa_type','VOCATIONAL_TRAINING','fr','Visa apprentissage',NULL),
+  ('visa_type','VOCATIONAL_TRAINING','ar','تأشيرة تدريب',NULL),
+  ('visa_type','STUDY','de','Studienvisum',NULL),
+  ('visa_type','STUDY','fr','Visa études',NULL),
+  ('visa_type','STUDY','ar','تأشيرة دراسة',NULL),
+  ('visa_type','JOB_SEEKER','de','Jobsuche',NULL),
+  ('visa_type','JOB_SEEKER','fr','Recherche d''emploi',NULL),
+  ('visa_type','JOB_SEEKER','ar','البحث عن عمل',NULL),
+  ('visa_type','RECOGNITION','de','Anerkennung der Qualifikation',NULL),
+  ('visa_type','RECOGNITION','fr','Reconnaissance de qualification',NULL),
+  ('visa_type','RECOGNITION','ar','الاعتراف بالمؤهلات',NULL),
+  ('visa_type','CHANCENKARTE','de','Chancenkarte','Punkte-basiert'),
+  ('visa_type','CHANCENKARTE','fr','Chancenkarte','Basée sur un barème de points'),
+  ('visa_type','CHANCENKARTE','ar','بطاقة الفرص','مبنية على نظام نقاط');
+
+-- Anerkennung stages
+INSERT INTO reference_entries (type, code, sort_order) VALUES
+  ('anerkennung_stage','INFORMATION',1),
+  ('anerkennung_stage','DOCUMENTS_COLLECTION',2),
+  ('anerkennung_stage','APPLICATION_SUBMITTED',3),
+  ('anerkennung_stage','EQUIVALENCE_REVIEW',4),
+  ('anerkennung_stage','COMPENSATION_REQUIRED',5),
+  ('anerkennung_stage','COMPLETED',6);
+
+INSERT INTO reference_entry_translations (type, code, locale, label, hint) VALUES
+  ('anerkennung_stage','INFORMATION','de','Information','Kostenlose Erstberatung'),
+  ('anerkennung_stage','INFORMATION','fr','Information','Consultation initiale gratuite'),
+  ('anerkennung_stage','INFORMATION','ar','الاستعلام','استشارة أولية مجانية'),
+  ('anerkennung_stage','DOCUMENTS_COLLECTION','de','Unterlagen sammeln',NULL),
+  ('anerkennung_stage','DOCUMENTS_COLLECTION','fr','Collecte des documents',NULL),
+  ('anerkennung_stage','DOCUMENTS_COLLECTION','ar','تجميع الوثائق',NULL),
+  ('anerkennung_stage','APPLICATION_SUBMITTED','de','Antrag eingereicht',NULL),
+  ('anerkennung_stage','APPLICATION_SUBMITTED','fr','Demande soumise',NULL),
+  ('anerkennung_stage','APPLICATION_SUBMITTED','ar','تم تقديم الطلب',NULL),
+  ('anerkennung_stage','EQUIVALENCE_REVIEW','de','Gleichwertigkeitsprüfung',NULL),
+  ('anerkennung_stage','EQUIVALENCE_REVIEW','fr','Évaluation d''équivalence',NULL),
+  ('anerkennung_stage','EQUIVALENCE_REVIEW','ar','مراجعة التكافؤ',NULL),
+  ('anerkennung_stage','COMPENSATION_REQUIRED','de','Ausgleichsmaßnahme erforderlich',NULL),
+  ('anerkennung_stage','COMPENSATION_REQUIRED','fr','Mesure compensatoire requise',NULL),
+  ('anerkennung_stage','COMPENSATION_REQUIRED','ar','مطلوب إجراء تعويضي',NULL),
+  ('anerkennung_stage','COMPLETED','de','Abgeschlossen',NULL),
+  ('anerkennung_stage','COMPLETED','fr','Terminé',NULL),
+  ('anerkennung_stage','COMPLETED','ar','مكتمل',NULL);
+
+-- Job categories
+INSERT INTO reference_entries (type, code, sort_order) VALUES
+  ('job_category','IT',1),
+  ('job_category','PFLEGE',2),
+  ('job_category','TRANSPORT',3),
+  ('job_category','HANDWERK',4),
+  ('job_category','GASTRO',5),
+  ('job_category','BAU',6),
+  ('job_category','SONSTIGE',99);
+
+INSERT INTO reference_entry_translations (type, code, locale, label, hint) VALUES
+  ('job_category','IT','de','IT & Software',NULL),
+  ('job_category','IT','fr','IT & Logiciels',NULL),
+  ('job_category','IT','ar','تكنولوجيا المعلومات',NULL),
+  ('job_category','PFLEGE','de','Pflege & Gesundheit',NULL),
+  ('job_category','PFLEGE','fr','Santé & Soins',NULL),
+  ('job_category','PFLEGE','ar','الرعاية والصحة',NULL),
+  ('job_category','TRANSPORT','de','Transport & Logistik',NULL),
+  ('job_category','TRANSPORT','fr','Transport & Logistique',NULL),
+  ('job_category','TRANSPORT','ar','النقل واللوجستيك',NULL),
+  ('job_category','HANDWERK','de','Handwerk',NULL),
+  ('job_category','HANDWERK','fr','Artisanat',NULL),
+  ('job_category','HANDWERK','ar','الحرف',NULL),
+  ('job_category','GASTRO','de','Gastronomie',NULL),
+  ('job_category','GASTRO','fr','Restauration',NULL),
+  ('job_category','GASTRO','ar','المطاعم',NULL),
+  ('job_category','BAU','de','Bau',NULL),
+  ('job_category','BAU','fr','Bâtiment',NULL),
+  ('job_category','BAU','ar','البناء',NULL),
+  ('job_category','SONSTIGE','de','Sonstige',NULL),
+  ('job_category','SONSTIGE','fr','Autres',NULL),
+  ('job_category','SONSTIGE','ar','أخرى',NULL);
+
+-- Professions (used by onboarding autocomplete)
+INSERT INTO professions (code, regulated, category_hint, skills) VALUES
+  ('it_dev', false, 'IT', 'JavaScript,TypeScript,React,Node.js,Git'),
+  ('java_dev', false, 'IT', 'Java,Spring Boot,Hibernate,Maven,JUnit'),
+  ('data_eng', false, 'IT', 'Python,SQL,Airflow,Spark,dbt'),
+  ('devops', false, 'IT', 'Docker,Kubernetes,Terraform,AWS,CI/CD'),
+  ('ui_ux', false, 'IT', 'Figma,Design Systems,Prototyping'),
+  ('nurse', true, 'PFLEGE', 'Patientenbetreuung,Medikamentengabe,Dokumentation'),
+  ('elderly_care', true, 'PFLEGE', 'Grundpflege,Mobilisation,Pflegeplanung'),
+  ('doctor', true, 'PFLEGE', 'Anamnese,Diagnostik,Approbation'),
+  ('physiotherapist', true, 'PFLEGE', 'Manuelle Therapie,Reha'),
+  ('truck_driver', true, 'TRANSPORT', 'CE-Führerschein,ADR,Tourenplanung'),
+  ('logistics', false, 'TRANSPORT', 'Lager,Disposition,SAP,Staplerschein'),
+  ('electrician', true, 'HANDWERK', 'VDE-Normen,Installation,Messtechnik'),
+  ('welder', false, 'HANDWERK', 'MAG,WIG,MIG,Schweißerprüfung'),
+  ('mechanic', true, 'HANDWERK', 'Diagnose,Motorinstandsetzung,OBD'),
+  ('shk', true, 'HANDWERK', 'Heizungsbau,Sanitär,Gas,Wärmepumpen'),
+  ('mason', false, 'BAU', 'Mauerwerk,Schalung,Putz'),
+  ('civil_engineer', false, 'BAU', 'Statik,AutoCAD,BIM,VOB'),
+  ('chef', false, 'GASTRO', 'HACCP,A-la-carte,Warenkunde'),
+  ('hotel', false, 'GASTRO', 'Rezeption,Opera PMS,Service');
+
+INSERT INTO profession_translations (profession_code, locale, label) VALUES
+  ('it_dev','de','IT-Entwickler/in'),('it_dev','fr','Développeur·euse informatique'),('it_dev','ar','مطور/ة برمجيات'),
+  ('java_dev','de','Java-Entwickler/in'),('java_dev','fr','Développeur·euse Java'),('java_dev','ar','مطور/ة جافا'),
+  ('data_eng','de','Data Engineer'),('data_eng','fr','Data Engineer'),('data_eng','ar','مهندس/ة بيانات'),
+  ('devops','de','DevOps Engineer'),('devops','fr','Ingénieur·e DevOps'),('devops','ar','مهندس/ة DevOps'),
+  ('ui_ux','de','UI/UX Designer/in'),('ui_ux','fr','Designer UI/UX'),('ui_ux','ar','مصمم/ة UI/UX'),
+  ('nurse','de','Gesundheits- und Krankenpfleger/in'),('nurse','fr','Infirmier·ère'),('nurse','ar','ممرض/ة'),
+  ('elderly_care','de','Altenpfleger/in'),('elderly_care','fr','Aide-soignant·e personnes âgées'),('elderly_care','ar','ممرض/ة مسنين'),
+  ('doctor','de','Arzt/Ärztin'),('doctor','fr','Médecin'),('doctor','ar','طبيب/ة'),
+  ('physiotherapist','de','Physiotherapeut/in'),('physiotherapist','fr','Kinésithérapeute'),('physiotherapist','ar','أخصائي/ة علاج طبيعي'),
+  ('truck_driver','de','Berufskraftfahrer/in (LKW)'),('truck_driver','fr','Chauffeur·euse poids lourd'),('truck_driver','ar','سائق/ة شاحنة'),
+  ('logistics','de','Logistikfachkraft'),('logistics','fr','Spécialiste logistique'),('logistics','ar','أخصائي/ة لوجستيك'),
+  ('electrician','de','Elektriker/in'),('electrician','fr','Électricien·ne'),('electrician','ar','كهربائي/ة'),
+  ('welder','de','Schweißer/in'),('welder','fr','Soudeur·euse'),('welder','ar','لحّام/ة'),
+  ('mechanic','de','KFZ-Mechatroniker/in'),('mechanic','fr','Mécatronicien·ne auto'),('mechanic','ar','ميكانيكي/ة سيارات'),
+  ('shk','de','Anlagenmechaniker/in SHK'),('shk','fr','Plombier·ère chauffagiste'),('shk','ar','ميكانيكي/ة تدفئة وسباكة'),
+  ('mason','de','Maurer/in'),('mason','fr','Maçon·ne'),('mason','ar','بنّاء/ة'),
+  ('civil_engineer','de','Bauingenieur/in'),('civil_engineer','fr','Ingénieur·e civil'),('civil_engineer','ar','مهندس/ة مدني'),
+  ('chef','de','Koch/Köchin'),('chef','fr','Cuisinier·ère'),('chef','ar','طبّاخ/ة'),
+  ('hotel','de','Hotelfachmann/-frau'),('hotel','fr','Employé·e d''hôtel'),('hotel','ar','موظف/ة فندق');

@@ -1,0 +1,114 @@
+spring:
+  application:
+    name: bewerbi-tn-backend
+  threads:
+    virtual:
+      enabled: true  # Java 21 virtual threads for request handling
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/bewerbi}
+    username: ${DB_USER:bewerbi}
+    password: ${DB_PASSWORD:bewerbi_dev}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        format_sql: false
+    open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    properties:
+      mail.smtp.starttls.enable: false
+      mail.smtp.auth: false
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 15MB
+  docker:
+    compose:
+      enabled: true
+      lifecycle-management: start-and-stop
+
+server:
+  port: ${SERVER_PORT:8080}
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/css,application/javascript
+  error:
+    include-message: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  info:
+    git:
+      mode: full
+
+springdoc:
+  api-docs:
+    path: /api/v1/docs
+  swagger-ui:
+    path: /api/v1/swagger-ui
+
+bewerbi:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:a-development-only-secret-please-override-with-a-256-bit-secret-in-production}
+      access-ttl-minutes: 60
+      refresh-ttl-days: 30
+      issuer: bewerbi.tn
+    cors:
+      allowed-origins:
+        - http://localhost:8081
+        - http://localhost:19006
+        - http://localhost:3000
+  upload:
+    root: ${UPLOAD_ROOT:./var/uploads}
+  integrations:
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY:}
+      model: claude-sonnet-4-5-20250929
+    stripe:
+      secret-key: ${STRIPE_SECRET:}
+      webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+
+logging:
+  level:
+    root: INFO
+    tn.bewerbi: DEBUG
+    org.springframework.security: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%15.15t] %-40.40logger{39} : %m%n"
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:tc:postgresql:16-alpine:///bewerbi_test
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+  flyway:
+    clean-disabled: false
+  docker:
+    compose:
+      enabled: false

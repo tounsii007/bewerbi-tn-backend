@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build + Test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: bewerbi
+          POSTGRES_PASSWORD: bewerbi_dev
+          POSTGRES_DB: bewerbi_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U bewerbi"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Bootstrap Maven Wrapper
+        run: sh .mvn/wrapper/fetch.sh
+
+      - name: Build all modules
+        run: ./mvnw -B -ntp -T 1C package -DskipTests
+
+      - name: Run unit tests
+        run: ./mvnw -B -ntp -T 1C test
+
+      - name: Run integration tests (Testcontainers)
+        env:
+          TESTCONTAINERS_RYUK_DISABLED: "true"
+        run: ./mvnw -B -ntp verify -Dtest='*IntegrationTest'
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: "**/target/surefire-reports/**"
+          if-no-files-found: ignore
+
+  docker:
+    name: Build Docker images
+    runs-on: ubuntu-24.04
+    needs: build
+    if: github.event_name == 'push'
+    timeout-minutes: 30
+
+    strategy:
+      matrix:
+        service:
+          - { path: gateway,                        artifact: gateway }
+          - { path: services/identity-service,      artifact: identity-service }
+          - { path: services/i18n-service,          artifact: i18n-service }
+          - { path: services/jobs-service,          artifact: jobs-service }
+          - { path: services/applications-service,  artifact: applications-service }
+          - { path: services/companies-service,     artifact: companies-service }
+          - { path: services/immigration-service,   artifact: immigration-service }
+          - { path: services/documents-service,     artifact: documents-service }
+          - { path: services/matching-service,      artifact: matching-service }
+          - { path: services/notification-service,  artifact: notification-service }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build ${{ matrix.service.artifact }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/Dockerfile.service
+          build-args: |
+            MODULE_PATH=${{ matrix.service.path }}
+            MODULE_ARTIFACT=${{ matrix.service.artifact }}
+          push: false
+          cache-from: type=gha,scope=${{ matrix.service.artifact }}
+          cache-to: type=gha,scope=${{ matrix.service.artifact }},mode=max
+          tags: bewerbi/${{ matrix.service.artifact }}:latest

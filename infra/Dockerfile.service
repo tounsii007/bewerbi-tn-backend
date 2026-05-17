@@ -1,0 +1,57 @@
+# syntax=docker/dockerfile:1.7
+# Shared multi-stage Dockerfile for every microservice.
+# Build with:
+#   docker build -f infra/Dockerfile.service \
+#     --build-arg MODULE_PATH=services/identity-service \
+#     --build-arg MODULE_ARTIFACT=identity-service \
+#     -t bewerbi/identity-service .
+
+ARG MODULE_PATH
+ARG MODULE_ARTIFACT
+
+# ─── 1. Dependency cache layer ──────────────────────────────────────────
+FROM eclipse-temurin:21-jdk-alpine AS deps
+WORKDIR /workspace
+
+# Copy the full POM tree first so the dependency layer can be cached across
+# source changes (Maven needs every pom.xml for the reactor to resolve).
+COPY pom.xml .
+COPY .mvn .mvn
+COPY mvnw mvnw
+COPY shared shared
+COPY gateway/pom.xml gateway/pom.xml
+COPY services/identity-service/pom.xml services/identity-service/pom.xml
+COPY services/i18n-service/pom.xml services/i18n-service/pom.xml
+COPY services/jobs-service/pom.xml services/jobs-service/pom.xml
+COPY services/applications-service/pom.xml services/applications-service/pom.xml
+COPY services/companies-service/pom.xml services/companies-service/pom.xml
+COPY services/immigration-service/pom.xml services/immigration-service/pom.xml
+COPY services/documents-service/pom.xml services/documents-service/pom.xml
+COPY services/matching-service/pom.xml services/matching-service/pom.xml
+COPY services/notification-service/pom.xml services/notification-service/pom.xml
+
+RUN chmod +x mvnw && ./mvnw -B -q dependency:go-offline -DskipTests || true
+
+# ─── 2. Build layer ──────────────────────────────────────────────────────
+FROM deps AS build
+ARG MODULE_PATH
+ARG MODULE_ARTIFACT
+COPY gateway gateway
+COPY services services
+
+# Build just the one service and everything it depends on, skipping tests
+RUN ./mvnw -B -pl ${MODULE_PATH} -am -DskipTests package
+
+# ─── 3. Runtime ──────────────────────────────────────────────────────────
+FROM eclipse-temurin:21-jre-alpine AS runtime
+ARG MODULE_PATH
+ARG MODULE_ARTIFACT
+RUN addgroup -S app && adduser -S app -G app
+WORKDIR /app
+
+COPY --from=build /workspace/${MODULE_PATH}/target/${MODULE_ARTIFACT}-*.jar app.jar
+
+USER app
+EXPOSE 8080
+ENV JAVA_TOOL_OPTIONS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75"
+ENTRYPOINT ["java", "-jar", "app.jar"]

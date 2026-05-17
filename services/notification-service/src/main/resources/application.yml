@@ -1,0 +1,29 @@
+spring:
+  application.name: notification-service
+  threads.virtual.enabled: true
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+  data.redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    consumer:
+      group-id: notification-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: latest
+
+server.port: ${SERVER_PORT:8088}
+
+bewerbi:
+  security.jwt.secret: ${JWT_SECRET:a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
+  clients.i18n-service.base-url: ${I18N_SERVICE_URL:http://localhost:8181}
+  notifications:
+    from: noreply@bewerbi.tn
+    base-url: ${FRONTEND_URL:https://bewerbi.tn}
+
+springdoc:
+  api-docs.path: /v3/api-docs
+  swagger-ui.path: /swagger-ui

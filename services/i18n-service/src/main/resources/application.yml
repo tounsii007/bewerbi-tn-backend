@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: i18n-service
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/bewerbi?currentSchema=i18n}
+    username: ${DB_USER:bewerbi}
+    password: ${DB_PASSWORD:bewerbi_dev}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.default_schema: i18n
+    open-in-view: false
+  flyway:
+    enabled: true
+    default-schema: i18n
+    schemas: i18n
+    locations: classpath:db/migration
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1024,expireAfterWrite=300s
+
+server:
+  port: ${SERVER_PORT:8181}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui
+
+bewerbi:
+  i18n:
+    default-locale: de
+    supported-locales: de,fr,ar

@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    # Overridden by @ServiceConnection → TestcontainersPostgreSQLContainer
+    hikari.maximum-pool-size: 3
+  jpa:
+    hibernate.ddl-auto: validate
+    properties.hibernate.default_schema: identity
+  flyway:
+    enabled: true
+    default-schema: identity
+    schemas: identity
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+bewerbi:
+  security:
+    jwt:
+      secret: test-only-jwt-secret-that-is-definitely-long-enough-for-hs256
+      access-ttl-minutes: 60
+      refresh-ttl-days: 1
+      issuer: bewerbi.tn.test
+  clients:
+    i18n-service:
+      base-url: http://localhost:0

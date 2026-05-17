@@ -1,0 +1,25 @@
+spring:
+  application.name: matching-service
+  threads.virtual.enabled: true
+
+server.port: ${SERVER_PORT:8087}
+
+bewerbi:
+  security.jwt.secret: ${JWT_SECRET:a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
+  clients:
+    jobs-service.base-url: ${JOBS_SERVICE_URL:http://localhost:8082}
+    identity-service.base-url: ${IDENTITY_SERVICE_URL:http://localhost:8081}
+
+resilience4j:
+  circuitbreaker.instances:
+    default:
+      slidingWindowSize: 10
+      failureRateThreshold: 60
+      waitDurationInOpenState: 10s
+  timelimiter.instances:
+    default:
+      timeoutDuration: 5s
+
+springdoc:
+  api-docs.path: /v3/api-docs
+  swagger-ui.path: /swagger-ui
