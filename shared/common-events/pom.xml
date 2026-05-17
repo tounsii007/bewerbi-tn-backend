@@ -26,5 +26,20 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
+        <!--
+            EventPublisher uses org.slf4j.Logger / LoggerFactory directly,
+            but this module never declared slf4j-api itself. Compiles ran
+            fine locally because spring-kafka's transitive dep graph
+            picked it up via a Spring Boot starter elsewhere in the
+            reactor, but with -T 1C parallel module build on CI the
+            common-events compile fires before whatever was pulling
+            slf4j in — and Maven won't fall back to runtime classpath
+            for `javac`. Declaring slf4j-api explicitly makes the
+            module self-contained and order-independent.
+        -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
     </dependencies>
 </project>
