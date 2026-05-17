@@ -64,7 +64,12 @@ jobs:
         # mvn test picks up IdentityIntegrationTest, which needs the
         # full Kafka stack (not just Postgres + Redis) and times out
         # waiting for the bewerbi.users.registered topic metadata.
-        run: ./mvnw -B -ntp -T 1C test -Dtest='!*IntegrationTest'
+        #
+        # failIfNoSpecifiedTests=false is required because the negation
+        # pattern matches no tests in common-api / common-events
+        # (which legitimately don't have tests yet), and Surefire 3.x
+        # treats that as an error by default.
+        run: ./mvnw -B -ntp -T 1C test -Dtest='!*IntegrationTest' -Dsurefire.failIfNoSpecifiedTests=false
 
       - name: Run integration tests (Testcontainers)
         env:
