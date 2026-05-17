@@ -74,7 +74,11 @@ jobs:
       - name: Run integration tests (Testcontainers)
         env:
           TESTCONTAINERS_RYUK_DISABLED: "true"
-        run: ./mvnw -B -ntp verify -Dtest='*IntegrationTest'
+        # Same `failIfNoSpecifiedTests=false` story as the unit-test
+        # step: common-api / common-events have no *IntegrationTest
+        # classes and Surefire would otherwise error out on the
+        # empty-match.
+        run: ./mvnw -B -ntp verify -Dtest='*IntegrationTest' -Dsurefire.failIfNoSpecifiedTests=false
 
       - name: Upload test reports
         if: always()
