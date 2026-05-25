@@ -1,4 +1,4 @@
-.gradle/
+﻿.gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
@@ -27,3 +27,6 @@ application-local.yaml
 ### Logs ###
 *.log
 logs/
+
+# Claude Code agent workspace (worktrees, MCP state, local settings)
+.claude/
